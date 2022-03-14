@@ -1,13 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React from 'react';
 import {
   SafeAreaView,
@@ -15,32 +5,24 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {enableScreens} from 'react-native-screens';
+import {NavigationContainer} from '@react-navigation/native';
+import StackNavigator from './src/navigation/StackNavigator';
+import {AuthContextProvider} from './src/store/authContext';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
+enableScreens();
 
 const App = () => {
-
-
   return (
-    <SafeAreaView>
-      <StatusBar barStyle={'light-content'} backgroundColor="black"  />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic">
-        <View>
-          <Text>Hello Chat App!</Text>       
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <AuthContextProvider>
+      <NavigationContainer>
+        <StatusBar barStyle={'light-content'} backgroundColor="black" />
+        <StackNavigator />
+      </NavigationContainer>
+    </AuthContextProvider>
   );
 };
 
