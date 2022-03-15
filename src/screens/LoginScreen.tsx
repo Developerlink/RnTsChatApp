@@ -7,18 +7,14 @@ import {
   Button,
   Dimensions,
 } from 'react-native';
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import {useForm, Controller} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import auth from '@react-native-firebase/auth';
 import {RootStackScreenProps} from '../navigation/types';
 import {useAuthContext} from '../store/authContext';
 
 import colors from '../constants/colors';
-
-interface IData {
-  email: string,
-  password: string
-}
 
 const schema = yup.object({
   email: yup.string().email().required(),
@@ -37,44 +33,78 @@ export default function LoginScreen({
     setValue,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: {errors},
   } = useForm({
-    mode: "all",
+    mode: 'all',
     resolver: yupResolver(schema),
   });
   const emailInputRef = useRef<TextInput | null>(null);
   const passwordInputRef = useRef<TextInput | null>(null);
 
-  console.log(errors);
+  //console.log(errors);
 
   // Setting up start values
   useEffect(() => {
-    setValue("email", "");
-    setValue("password", "");
-  },[])
+    setValue('email', '');
+    setValue('password', '');
+  }, []);
 
-  const onSubmit = (data: IData) => {
+  const signUp = (data: any) => {
+    auth()
+      .createUserWithEmailAndPassword(
+        data.email,
+        data.password,
+      )
+      .then(() => {
+        console.log('User account created & signed in!');
+      })
+      .catch(error => {
+        if (error.code === 'auth/email-already-in-use') {
+          console.log('That email address is already in use!');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+          console.log('That email address is invalid!');
+        }
+
+        console.error(error);
+      });
+  };
+
+  const signIn = (data: any) => {
+    auth()
+    .signInWithEmailAndPassword(
+      data.email,
+      data.password,
+    )
+    .then(() => {
+      console.log('User account signed in!');
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  }
+
+  const onSubmit = (data: any) => {
     //console.log(data);
 
     if (isSigningIn) {
-
+      signIn(data);
     } else {
-
+      signUp(data);
     }
-  }
+  };
 
   const onError = (errors: any) => {
     //console.log("inside on error");
     const error = Object.keys(errors)[0];
 
-      if (error === "email") {
-        emailInputRef?.current?.focus();
-      } else if (error === "password") {
-        passwordInputRef?.current?.focus();
-      } 
+    if (error === 'email') {
+      emailInputRef?.current?.focus();
+    } else if (error === 'password') {
+      passwordInputRef?.current?.focus();
+    }
   };
-
-
 
   // sign up functionality
   // sign in functionality
@@ -83,25 +113,25 @@ export default function LoginScreen({
   return (
     <View style={styles.screen}>
       <View style={styles.inputContainer}>
-      <Controller
-            control={control}
-            name="email"
-            rules={{ required: true }}
-            defaultValue=""
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={styles.input}
-                value={value}
-                onChangeText={(value) => onChange(value)}
-                onBlur={onBlur}
-                returnKeyType="next"
-                ref={emailInputRef}
-              />
-            )}
-          />
-          {errors["email"] && (
-            <Text style={styles.error}>{errors["email"].message}</Text>
+        <Controller
+          control={control}
+          name="email"
+          rules={{required: true}}
+          defaultValue=""
+          render={({field: {onChange, onBlur, value}}) => (
+            <TextInput
+              style={styles.input}
+              value={value}
+              onChangeText={value => onChange(value)}
+              onBlur={onBlur}
+              returnKeyType="next"
+              ref={emailInputRef}
+            />
           )}
+        />
+        {errors['email'] && (
+          <Text style={styles.error}>{errors['email'].message}</Text>
+        )}
         {/* <TextInput
           style={styles.input}
           value={email}
@@ -110,35 +140,43 @@ export default function LoginScreen({
         <Text style={styles.label}>Email</Text>
       </View>
       <View style={styles.inputContainer}>
-      <Controller
-            control={control}
-            name="password"
-            rules={{ required: true }}
-            defaultValue=""
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={styles.input}
-                value={value}
-                onChangeText={(value) => onChange(value)}
-                onBlur={onBlur}
-                returnKeyType="done"
-                secureTextEntry
-                ref={passwordInputRef}
-              />
-            )}
-          />
-          {errors["password"] && (
-            <Text style={styles.error}>{errors["password"].message}</Text>
+        <Controller
+          control={control}
+          name="password"
+          rules={{required: true}}
+          defaultValue=""
+          render={({field: {onChange, onBlur, value}}) => (
+            <TextInput
+              style={styles.input}
+              value={value}
+              onChangeText={value => onChange(value)}
+              onBlur={onBlur}
+              returnKeyType="done"
+              secureTextEntry
+              ref={passwordInputRef}
+            />
           )}
+        />
+        {errors['password'] && (
+          <Text style={styles.error}>{errors['password'].message}</Text>
+        )}
         {/* <TextInput style={styles.input} secureTextEntry /> */}
         <Text style={styles.label}>Password</Text>
       </View>
       <View style={styles.upperButtonContainer}>
         <View style={styles.upperButton}>
           {isSigningIn ? (
-            <Button title="Sign In" color={colors.primary} onPress={handleSubmit(onSubmit, onError)}/>
+            <Button
+              title="Sign In"
+              color={colors.primary}
+              onPress={handleSubmit(onSubmit, onError)}
+            />
           ) : (
-            <Button title="Sign Up" color={colors.primary} onPress={handleSubmit(onSubmit, onError)}/>
+            <Button
+              title="Sign Up"
+              color={colors.primary}
+              onPress={handleSubmit(onSubmit, onError)}
+            />
           )}
         </View>
         <View style={styles.upperButton}>
@@ -206,6 +244,6 @@ const styles = StyleSheet.create({
     width: '60%',
   },
   error: {
-    color: "red",
+    color: 'red',
   },
 });

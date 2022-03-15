@@ -40,7 +40,9 @@ export default function StackNavigator() {
   return (
     <RootStack.Navigator initialRouteName="Home"
     screenOptions={{
-      headerRight: () => <Button title='Logout' onPress={() => onLogOut()} />
+      headerRight: () => <Button title='Logout' onPress={() => auth()
+        .signOut()
+        .then(() => console.log('User signed out!'))} />
     }}>
       {user ? (
         <>
