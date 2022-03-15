@@ -1,15 +1,12 @@
 import React, {createContext, useState, FC, useContext, useEffect} from 'react';
-import {boolean} from 'yup';
 
 interface IAuthContext {
-  isLoading: boolean;
   isLoggedIn: boolean;
   onLogOut: () => void;
   onLogIn: (email: string, password: string) => void;
 }
 
 const initialState: IAuthContext = {
-  isLoading: true,
   isLoggedIn: false,
   onLogOut: () => {},
   onLogIn: (email: string, password: string) => {},
@@ -18,12 +15,10 @@ const initialState: IAuthContext = {
 const AuthContext = createContext<IAuthContext>(initialState);
 
 export const AuthContextProvider: FC = ({children}) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
-      setIsLoading(false);
     }, 3000);
   }, []);
 
@@ -36,7 +31,7 @@ export const AuthContextProvider: FC = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={{isLoading, isLoggedIn, onLogOut, onLogIn}}>
+    <AuthContext.Provider value={{isLoggedIn, onLogOut, onLogIn}}>
       {children}
     </AuthContext.Provider>
   );
