@@ -9,7 +9,8 @@ import TestingScreen from '../screens/TestingScreen';
 import SplashScreen from '../screens/SplashScreen';
 import {useAuthContext} from '../store/authContext';
 import {signOut} from '../api/firebase';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import colors from '../constants/colors';
 import {SimultaneousGesture} from 'react-native-gesture-handler/lib/typescript/handlers/gestures/gestureComposition';

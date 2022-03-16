@@ -12,10 +12,12 @@ import {
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import {signUp, signIn} from '../api/firebase';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+
 import {RootStackScreenProps} from '../navigation/types';
 import {useAuthContext} from '../store/authContext';
-import {signUp, signIn} from '../api/firebase';
-
 import colors from '../constants/colors';
 
 const schema = yup.object({
@@ -61,8 +63,26 @@ export default function LoginScreen({
     }
   };
 
-  // sign up functionality
-  // sign in functionality
+  GoogleSignin.configure({
+    webClientId:
+      '530816631694-ljusc5lqt6ijjmir9m55ht89umpdg3mp.apps.googleusercontent.com',
+  });
+
+  const signInWithGoogleAsync = async () => {
+    // Get the users ID token
+    const {idToken} = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    const userSignIn = auth().signInWithCredential(googleCredential);
+
+    userSignIn
+      .then(user => console.log(user))
+      .catch(error => console.log(error));
+  };
+
   // update context
 
   return (
@@ -159,7 +179,7 @@ export default function LoginScreen({
           <Button
             title="Sign in with Google"
             color={'darkred'}
-            onPress={() => {}}
+            onPress={signInWithGoogleAsync}
           />
         </View>
       </View>
