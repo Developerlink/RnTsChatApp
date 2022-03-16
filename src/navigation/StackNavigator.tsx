@@ -8,42 +8,45 @@ import ChatRoomScreen from '../screens/ChatRoomScreen';
 import TestingScreen from '../screens/TestingScreen';
 import SplashScreen from '../screens/SplashScreen';
 import {useAuthContext} from '../store/authContext';
-import auth from "@react-native-firebase/auth";
+import {signOut} from '../api/firebase';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {User} from '../models/user';
 
 import colors from '../constants/colors';
+import {SimultaneousGesture} from 'react-native-gesture-handler/lib/typescript/handlers/gestures/gestureComposition';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function StackNavigator() {
-  const { isLoggedIn, onLogIn, onLogOut} = useAuthContext();
-  // Set an initializing state whilst Firebase connects
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState<any>();
+  const {user, setUser, isLoading, setIsLoading} = useAuthContext();
   console.log(user);
 
-  // Handle user state changes
-  function onAuthStateChanged(user: any) {
-    setUser(user);
-    if (initializing) setInitializing(false);
-  }
-
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    const subscriber = auth().onAuthStateChanged(user => {
+      setUser(user);
+      if (isLoading) {
+        setIsLoading(false);
+      }
+    });
     return subscriber; // unsubscribe on unmount
   }, []);
 
-
-  if (initializing) {
+  if (isLoading) {
     return <SplashScreen />;
   }
 
   return (
-    <RootStack.Navigator initialRouteName="Home"
-    screenOptions={{
-      headerRight: () => <Button title='Logout' onPress={() => auth()
-        .signOut()
-        .then(() => console.log('User signed out!'))} />
-    }}>
+    <RootStack.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        headerRight: () => <Button title="Logout" onPress={signOut} />,
+        headerStyle: {
+          backgroundColor:
+            Platform.OS === 'android' ? colors.primaryDark : 'white',
+        },
+        headerTintColor:
+          Platform.OS === 'android' ? 'white' : colors.primaryDark,
+      }}>
       {user ? (
         <>
           <RootStack.Screen name="Home" component={HomeScreen} />
@@ -55,8 +58,11 @@ export default function StackNavigator() {
           <RootStack.Screen name="Testing" component={TestingScreen} />
         </>
       ) : (
-        <RootStack.Screen name="Login" component={LoginScreen}
-        options={{headerRight: () => <></>}} />
+        <RootStack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{headerRight: () => <></>}}
+        />
       )}
     </RootStack.Navigator>
   );

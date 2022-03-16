@@ -1,37 +1,52 @@
-import React, {createContext, useState, FC, useContext, useEffect} from 'react';
+import React, {
+  createContext,
+  useState,
+  FC,
+  useContext,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from 'react';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+
 
 interface IAuthContext {
-  isLoggedIn: boolean;
+  user: FirebaseAuthTypes.User | null;
+  setUser: Dispatch<SetStateAction<FirebaseAuthTypes.User | null>>;
+  isLoading: boolean;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
   onLogOut: () => void;
-  onLogIn: (email: string, password: string) => void;
+  onLogIn: (user: FirebaseAuthTypes.User) => void;
 }
 
 const initialState: IAuthContext = {
-  isLoggedIn: false,
+  user: null,
+  setUser: () => {},
+  isLoading: true,
+  setIsLoading: () => {},
   onLogOut: () => {},
-  onLogIn: (email: string, password: string) => {},
+  onLogIn: (user: FirebaseAuthTypes.User) => {},
 };
 
 const AuthContext = createContext<IAuthContext>(initialState);
 
 export const AuthContextProvider: FC = ({children}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setTimeout(() => {
-    }, 3000);
-  }, []);
-
+  // Don't seem to be doing anything
   const onLogOut = () => {
-    setIsLoggedIn(false);
+    setUser(null);
   };
 
-  const onLogIn = (email: string, password: string) => {
-    setIsLoggedIn(true);
+  // Don't seem to be doing anything
+  const onLogIn = (user: FirebaseAuthTypes.User) => {
+    setUser(user);
   };
 
   return (
-    <AuthContext.Provider value={{isLoggedIn, onLogOut, onLogIn}}>
+    <AuthContext.Provider
+      value={{user, setUser, isLoading, setIsLoading, onLogOut, onLogIn}}>
       {children}
     </AuthContext.Provider>
   );
