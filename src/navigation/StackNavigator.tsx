@@ -10,7 +10,6 @@ import SplashScreen from '../screens/SplashScreen';
 import {useAuthContext} from '../store/authContext';
 import {signOut} from '../api/firebase';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {User} from '../models/user';
 
 import colors from '../constants/colors';
 import {SimultaneousGesture} from 'react-native-gesture-handler/lib/typescript/handlers/gestures/gestureComposition';
