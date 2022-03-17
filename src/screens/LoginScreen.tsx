@@ -6,17 +6,17 @@ import {
   StyleSheet,
   Button,
   Dimensions,
-  Alert,
+  TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import {signUp, signIn} from '../api/firebase';
-import auth from '@react-native-firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
-
+import {signUp, signIn} from '../api/firebaseAuth';
+import {
+  signInWithGoogleAsync,
+  signInWithFacebookAsync,
+} from '../api/socialAuth';
 import {RootStackScreenProps} from '../navigation/types';
 import {useAuthContext} from '../store/authContext';
 import colors from '../constants/colors';
@@ -63,59 +63,6 @@ export default function LoginScreen({
       passwordInputRef?.current?.focus();
     }
   };
-
-  GoogleSignin.configure({
-    webClientId:
-      '530816631694-ljusc5lqt6ijjmir9m55ht89umpdg3mp.apps.googleusercontent.com',
-  });
-
-  const signInWithGoogleAsync = async () => {
-    // Get the users ID token
-    const {idToken} = await GoogleSignin.signIn();
-
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-    // Sign-in the user with the credential
-    const userSignIn = auth().signInWithCredential(googleCredential);
-
-    userSignIn
-      .then(user => console.log(user))
-      .catch(error => console.log(error));
-  };
-
-  const signInWithFacebookAsync = async () => {
-    // Attempt login with permissions
-    const result = await LoginManager.logInWithPermissions([
-      'public_profile',
-      'email',
-    ]);
-
-    if (result.isCancelled) {
-      throw 'User cancelled the login process';
-    }
-
-    // Once signed in, get the users AccesToken
-    const data = await AccessToken.getCurrentAccessToken();
-
-    if (!data) {
-      throw 'Something went wrong obtaining access token';
-    }
-
-    // Create a Firebase credential with the AccessToken
-    const facebookCredential = auth.FacebookAuthProvider.credential(
-      data.accessToken,
-    );
-
-    // Sign-in the user with the credential
-    const userSignIn = auth().signInWithCredential(facebookCredential);
-
-    userSignIn
-      .then(user => console.log(user))
-      .catch(error => console.log(error));
-  };
-
-  // update context
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -187,16 +134,17 @@ export default function LoginScreen({
               />
             )}
           </View>
-          <View style={styles.upperButton}>
-            <Button
-              title={
-                isSigningIn
-                  ? "Don't have an account?"
-                  : 'Already have an account?'
-              }
-              color={colors.primaryDark}
+          <View style={styles.questionContainer}>
+            <Text style={styles.questionText}>
+              {isSigningIn
+                ? "Don't have an account?"
+                : 'Already have an account?'}
+            </Text>
+            <TouchableOpacity
               onPress={() => setIsSigningIn(prevState => !prevState)}
-            />
+              activeOpacity={0.7}>
+              <Text style={styles.questionButton}>{isSigningIn ? 'Sign Up' : 'Sign In'}</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -248,6 +196,19 @@ const styles = StyleSheet.create({
   upperButton: {
     marginBottom: 10,
     width: Dimensions.get('window').width * 0.6,
+  },
+  questionContainer: {
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: "center"
+  },
+  questionText: {
+    fontWeight: '700',
+  },
+  questionButton: {
+    marginLeft: 10,
+    fontWeight: "700",
+    color: colors.primary
   },
   button: {
     marginBottom: 10,

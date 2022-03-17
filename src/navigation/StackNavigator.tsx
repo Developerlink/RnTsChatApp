@@ -8,18 +8,17 @@ import ChatRoomScreen from '../screens/ChatRoomScreen';
 import TestingScreen from '../screens/TestingScreen';
 import SplashScreen from '../screens/SplashScreen';
 import {useAuthContext} from '../store/authContext';
-import {signOut} from '../api/firebase';
+import {signOut} from '../api/firebaseAuth';
+import {signOutFromFacebook, signInWithGoogleAsync, signOutFromGoogleAsync} from '../api/socialAuth';
 import auth from '@react-native-firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import colors from '../constants/colors';
-import {SimultaneousGesture} from 'react-native-gesture-handler/lib/typescript/handlers/gestures/gestureComposition';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function StackNavigator() {
   const {user, setUser, isLoading, setIsLoading} = useAuthContext();
-  console.log(user);
+  //console.log(user);
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(user => {
@@ -39,7 +38,16 @@ export default function StackNavigator() {
     <RootStack.Navigator
       initialRouteName="Home"
       screenOptions={{
-        headerRight: () => <Button title="Logout" onPress={signOut} />,
+        headerRight: () => (
+          <Button
+            title="Logout"
+            onPress={() => {
+              signOut();
+              signOutFromGoogleAsync();
+              signOutFromFacebook();
+            }}
+          />
+        ),
         headerStyle: {
           backgroundColor:
             Platform.OS === 'android' ? colors.primaryDark : 'white',
