@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">RnTsChatApp</string>
+    <string name="app_name">RnTsChatApp</string>    
+    <string name="facebook_app_id">3095786230634812</string>
+    <string name="fb_login_protocol_scheme">fb3095786230634812</string>
+    <string name="facebook_client_token">e9ae0dcb8a435d45dc926abaeb137784</string>
 </resources>

@@ -15,6 +15,7 @@ import * as yup from 'yup';
 import {signUp, signIn} from '../api/firebase';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
 
 import {RootStackScreenProps} from '../navigation/types';
 import {useAuthContext} from '../store/authContext';
@@ -77,6 +78,37 @@ export default function LoginScreen({
 
     // Sign-in the user with the credential
     const userSignIn = auth().signInWithCredential(googleCredential);
+
+    userSignIn
+      .then(user => console.log(user))
+      .catch(error => console.log(error));
+  };
+
+  const signInWithFacebookAsync = async () => {
+    // Attempt login with permissions
+    const result = await LoginManager.logInWithPermissions([
+      'public_profile',
+      'email',
+    ]);
+
+    if (result.isCancelled) {
+      throw 'User cancelled the login process';
+    }
+
+    // Once signed in, get the users AccesToken
+    const data = await AccessToken.getCurrentAccessToken();
+
+    if (!data) {
+      throw 'Something went wrong obtaining access token';
+    }
+
+    // Create a Firebase credential with the AccessToken
+    const facebookCredential = auth.FacebookAuthProvider.credential(
+      data.accessToken,
+    );
+
+    // Sign-in the user with the credential
+    const userSignIn = auth().signInWithCredential(facebookCredential);
 
     userSignIn
       .then(user => console.log(user))
@@ -172,7 +204,7 @@ export default function LoginScreen({
           <Button
             title="Sign in with Facebook"
             color={'royalblue'}
-            onPress={() => {}}
+            onPress={signInWithFacebookAsync}
           />
         </View>
         <View style={styles.button}>
