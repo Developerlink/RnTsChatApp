@@ -39,6 +39,7 @@ export default function StackNavigator() {
       initialRouteName="Home"
       screenOptions={{
         headerRight: () => (
+
           <Button
             title="Logout"
             onPress={() => {
@@ -46,6 +47,7 @@ export default function StackNavigator() {
               signOutFromGoogleAsync();
               signOutFromFacebook();
             }}
+            color={colors.primary}            
           />
         ),
         headerStyle: {
