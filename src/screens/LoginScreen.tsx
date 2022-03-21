@@ -1,4 +1,4 @@
-import React, {useState, useRef, LegacyRef, useEffect} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import Icon from 'react-native-vector-icons/dist/FontAwesome';
+
 import {signUp, signIn} from '../api/firebaseAuth';
 import {
   signInWithGoogleAsync,
@@ -120,19 +122,11 @@ export default function LoginScreen({
         </View>
         <View style={styles.upperButtonContainer}>
           <View style={styles.upperButton}>
-            {isSigningIn ? (
-              <Button
-                title="Sign In"
-                color={colors.primary}
-                onPress={handleSubmit(onSubmit, onError)}
-              />
-            ) : (
-              <Button
-                title="Sign Up"
-                color={colors.primary}
-                onPress={handleSubmit(onSubmit, onError)}
-              />
-            )}
+            <Button
+              title={isSigningIn ? 'Sign in' : 'Sign up'}
+              color={colors.primary}
+              onPress={handleSubmit(onSubmit, onError)}
+            />
           </View>
           <View style={styles.questionContainer}>
             <Text style={styles.questionText}>
@@ -143,24 +137,38 @@ export default function LoginScreen({
             <TouchableOpacity
               onPress={() => setIsSigningIn(prevState => !prevState)}
               activeOpacity={0.7}>
-              <Text style={styles.questionButton}>{isSigningIn ? 'Sign Up' : 'Sign In'}</Text>
+              <Text style={styles.questionButton}>
+                {isSigningIn ? 'Sign Up' : 'Sign In'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.button}>
-          <Button
-            title="Sign in with Facebook"
-            color={'royalblue'}
+          <Icon.Button
+            name="facebook"
+            backgroundColor="#3b5998"
             onPress={signInWithFacebookAsync}
-          />
+            size={24}
+            borderRadius={3}>
+            <Text
+              style={{color: 'white', fontWeight: '500', textAlign: 'center'}}>
+              Sign in with Facebook
+            </Text>
+          </Icon.Button>
         </View>
         <View style={styles.button}>
-          <Button
-            title="Sign in with Google"
-            color={'darkred'}
+          <Icon.Button
+            name="google"
+            backgroundColor="darkred"
             onPress={signInWithGoogleAsync}
-          />
+            size={24}
+            borderRadius={3}>
+            <Text
+              style={{color: 'white', fontWeight: '500', textAlign: 'center'}}>
+              Sign in with Google
+            </Text>
+          </Icon.Button>
         </View>
       </View>
     </ScrollView>
@@ -200,15 +208,15 @@ const styles = StyleSheet.create({
   questionContainer: {
     marginBottom: 10,
     flexDirection: 'row',
-    justifyContent: "center"
+    justifyContent: 'center',
   },
   questionText: {
     fontWeight: '700',
   },
   questionButton: {
     marginLeft: 10,
-    fontWeight: "700",
-    color: colors.primary
+    fontWeight: '700',
+    color: colors.primary,
   },
   button: {
     marginBottom: 10,
@@ -216,5 +224,10 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

@@ -1,21 +1,29 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Button, FlatList, ListRenderItemInfo} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  FlatList,
+  ListRenderItemInfo,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {RootStackScreenProps} from '../navigation/types';
 import {ChatRoom} from '../models/chatroom';
-
+import ChatRoomItem from '../components/ChatRoomItem';
 import colors from '../constants/colors';
-import defaultExport from '@react-native-firebase/firestore';
+import TestingScreen from './TestingScreen';
 
 export default function HomeScreen({
   navigation,
   route,
 }: RootStackScreenProps<'Home'>) {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>();
+  const [isFetching, setIsFetching] = useState(false);
   const db = firestore();
-  console.log(chatRooms);
 
   const fetchChatRooms = () => {
+    setIsFetching(true);
     db.collection('chatrooms')
       .get()
       .then(querySnapshot => {
@@ -23,37 +31,37 @@ export default function HomeScreen({
           return {id: doc.id, ...doc.data()} as ChatRoom;
         });
         setChatRooms(fetchedChatRooms);
-        console.log(fetchedChatRooms);
-      });
+        //console.log(fetchedChatRooms);
+      })
+      .catch(error => console.log(error))
+      .finally(() => setIsFetching(false));
   };
 
   useEffect(() => {
     fetchChatRooms();
   }, []);
 
-  const renderChatRoomItem = (itemData: any) => {
-    return (
-      <View>
-        <Text>{itemData.id}</Text>
-      </View>
-    );
+  const enterChatRoomHandler = (roomId: string) => {
+    navigation.navigate("ChatRoom", {roomId})
+  }
+
+  const renderChatRoomItem = (itemData: ListRenderItemInfo<ChatRoom>) => {
+    return <ChatRoomItem onPress={enterChatRoomHandler} item={itemData.item} />;
   };
 
-  // TODO: name, short description of each room
-  // TODO: chevron icon
-  // TODO: press on room to go to chat
   // TODO: sorted by newest message
-  // TODO: pull to refresh or reload the list
 
   return (
     <FlatList
       style={styles.container}
       data={chatRooms}
       renderItem={renderChatRoomItem}
+      refreshing={isFetching}
+      onRefresh={() => fetchChatRooms()}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {width: '100%', padding: 5},
+  container: {width: '100%'},
 });
