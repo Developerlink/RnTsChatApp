@@ -42,8 +42,8 @@ export default function HomeScreen({
   }, []);
 
   const enterChatRoomHandler = (roomId: string) => {
-    navigation.navigate("ChatRoom", {roomId})
-  }
+    navigation.navigate('ChatRoom', {roomId});
+  };
 
   const renderChatRoomItem = (itemData: ListRenderItemInfo<ChatRoom>) => {
     return <ChatRoomItem onPress={enterChatRoomHandler} item={itemData.item} />;
