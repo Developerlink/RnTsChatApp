@@ -14,8 +14,9 @@ import {
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
-import {RootStackScreenProps} from '../navigation/types';
 
+import {RootStackScreenProps} from '../navigation/types';
+import ChatInputContainer from '../components/ChatInputContainer';
 import colors from '../constants/colors';
 
 export default function ChatRoomScreen({
@@ -23,7 +24,7 @@ export default function ChatRoomScreen({
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
   const db = firestore();
-  const [message, setMessage] = useState('');
+  const [newMessage, setNewMessage] = useState('');
 
   const fetchMessages = () => {
     db.collection('chatrooms')
@@ -36,10 +37,10 @@ export default function ChatRoomScreen({
   };
 
   const sendMessageHandler = () => {
-    console.log(message);
-    setMessage("");
+    console.log(newMessage);
+    setNewMessage('');
     Keyboard.dismiss();
-  }
+  };
 
   useEffect(() => {
     const {roomId} = route.params;
@@ -52,37 +53,13 @@ export default function ChatRoomScreen({
         <View style={styles.messageContainer}>
           <Text>test</Text>
         </View>
-        <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <View>
-              <FontAwesome name="photo" size={30} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <View>
-              <FontAwesome
-                name="camera-retro"
-                size={30}
-                color={colors.primary}
-              />
-            </View>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Type a message..."
-            multiline={true}
-            numberOfLines={1}
-            value={message}
-            onChangeText={newValue => setMessage(newValue)}
-          />
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={sendMessageHandler}>
-            <View>
-              <Ionicon name="send" size={30} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-        </View>
+        <ChatInputContainer 
+        value={newMessage}
+        onChangeText={setNewMessage}
+        onSend={sendMessageHandler}
+        onCamera={() => {}}
+        onPhotos={() => {}}        
+        />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -96,18 +73,5 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomColor: colors.primaryDark,
     borderBottomWidth: 2,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: 5,
-  },
-  textInput: {
-    flex: 1,
-    marginLeft: 10,
-    marginRight: 5,
-  },
-  iconButton: {
-    marginHorizontal: 5,
   },
 });
