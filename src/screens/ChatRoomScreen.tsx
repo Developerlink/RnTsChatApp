@@ -1,26 +1,29 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
-  Text,
-  StyleSheet,
-  Button,
-  TouchableOpacity,
   KeyboardAvoidingView,
+  TextInput,
+  StyleSheet,
+  Text,
   Platform,
-  Keyboard
+  TouchableWithoutFeedback,
+  Button,
+  Keyboard,
+  TouchableOpacity,
 } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
-import Icon from 'react-native-vector-icons/dist/FontAwesome';
-
 import {RootStackScreenProps} from '../navigation/types';
+
 import colors from '../constants/colors';
-import {TextInput, TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export default function ChatRoomScreen({
   navigation,
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
   const db = firestore();
+  const [message, setMessage] = useState('');
 
   const fetchMessages = () => {
     db.collection('chatrooms')
@@ -32,53 +35,79 @@ export default function ChatRoomScreen({
       });
   };
 
+  const sendMessageHandler = () => {
+    console.log(message);
+    setMessage("");
+    Keyboard.dismiss();
+  }
+
   useEffect(() => {
     const {roomId} = route.params;
-
     navigation.setOptions({title: roomId + ' Chat'});
   }, []);
 
-  // style komponents and layout
-  // TODO: last 50 messages
-  // TODO: scroll to load more
-  // TODO: realtime message updates
-  // TODO: avatar, name, date, text
-
   return (
-    <View style={styles.screen}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.inner}>
         <View style={styles.messageContainer}>
           <Text>test</Text>
         </View>
         <View style={styles.inputContainer}>
-          <View style={styles.input}>
-            <TextInput placeholder="Type a message..." />
-          </View>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity>
-              <View style={styles.iconButton}>
-                <Icon name="photo" size={30} color={colors.primary} />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.iconButton}>
-                <Icon name="camera-retro" size={30} color={colors.primary} />
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.iconButton}>
+            <View>
+              <FontAwesome name="photo" size={30} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <View>
+              <FontAwesome
+                name="camera-retro"
+                size={30}
+                color={colors.primary}
+              />
+            </View>
+          </TouchableOpacity>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Type a message..."
+            multiline={true}
+            numberOfLines={1}
+            value={message}
+            onChangeText={newValue => setMessage(newValue)}
+          />
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={sendMessageHandler}>
+            <View>
+              <Ionicon name="send" size={30} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {flex: 1},
+  inner: {
+    flex: 1,
+  },
   messageContainer: {
     flex: 1,
     borderBottomColor: colors.primaryDark,
     borderBottomWidth: 2,
   },
-  inputContainer: {},
-  input: {},
-  buttonsContainer: {flexDirection: 'row', paddingVertical: 5},
-  iconButton: {marginHorizontal: 5},
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 5,
+  },
+  textInput: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 5,
+  },
+  iconButton: {
+    marginHorizontal: 5,
+  },
 });
