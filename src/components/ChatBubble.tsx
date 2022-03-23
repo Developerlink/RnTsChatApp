@@ -1,28 +1,31 @@
 import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View, Dimensions} from 'react-native';
 import Card from './Card';
 
 import {Message} from '../models/message';
 
 interface Props {
   message: Message;
-  putAvatarOnLeft?: boolean;
+  isOwnMessage: boolean;
 }
 
-export default function ChatBubble({message, putAvatarOnLeft = true}: Props) {
+export default function ChatBubble({message, isOwnMessage}: Props) {
   return (
-    <View style={styles.messageBubble}>
-      {putAvatarOnLeft && (
+    <View style={isOwnMessage ? styles.ownMessageContainer : styles.messageContainer}>
+      {!isOwnMessage && (
         <Image style={styles.avatar} source={{uri: message.imageUrl}} />
       )}
-      <Card style={styles.message}>
-        <View style={styles.nameDate}>
+      <Card style={isOwnMessage ? styles.ownMessage : styles.message}>
+        <View style={styles.name}>          
           <Text>{message.displayedName}</Text>
-          <Text>{message.createdAt}</Text>
         </View>
         <Text>{message.text}</Text>
+        <View style={styles.date}>
+
+          <Text>{message.createdAt}</Text>      
+        </View>
       </Card>
-      {!putAvatarOnLeft && (
+      {isOwnMessage && (
         <Image style={styles.avatar} source={{uri: message.imageUrl}} />
       )}
     </View>
@@ -37,21 +40,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginHorizontal: 10,
   },
-  messageBubble: {flexDirection: 'row', marginBottom: 10},
-  ownMessageBubble: {
-    alignSelf: 'flex-end',
+  messageContainer: {flexDirection: 'row', marginBottom: 10},
+  ownMessageContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    justifyContent: 'flex-end',
   },
   message: {
     width: '65%',
   },
-  nameDate: {
+  ownMessage: {
+    backgroundColor: '#efe',
+    width: '65%',
+  },
+  name: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     marginBottom: 5,
   },
-  ownMessageColor: {
-    backgroundColor: '#efe',
-  },
+  date: {
+    flexDirection: 'row',
+    justifyContent: "flex-end",
+    marginTop: 5
+  }
 });

@@ -11,60 +11,115 @@ import {
   Keyboard,
   TouchableOpacity,
   Image,
+  FlatList,
+  ListRenderItemInfo,
+  ActivityIndicator,
 } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Ionicon from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
 
+import colors from '../constants/colors';
 import {RootStackScreenProps} from '../navigation/types';
 import ChatInputContainer from '../components/ChatInputContainer';
-import Card from '../components/Card';
-import ChatBubble from '../components/ChatBubble';
-import colors from '../constants/colors';
-import { Message } from '../models/message';
+import ChatMessageContainer from '../components/ChatMessageContainer';
+import {Message, SendMessage} from '../models/message';
+import {useAuthContext} from '../store/authContext';
 
 export default function ChatRoomScreen({
   navigation,
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
-  const db = firestore();
-  const [newMessage, setNewMessage] = useState('');
+  const [newText, setNewText] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const {user} = useAuthContext();
+  const [roomId, setRoomId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [messageLimit, setMessageLimit] = useState(5);
+  console.log(isLoading);
 
-  const fetchMessages = () => {
-    db.collection('chatrooms')
-      .doc('Food')
+  const fetchMessages = (roomId: string) => {
+    setIsLoading(true);
+    firestore()
+      .collection('chatrooms')
+      .doc(roomId)
       .collection('messages')
+      .limit(messageLimit)
+      .orderBy('createdAt', 'desc')
       .get()
       .then(querySnapshot => {
-        const data = querySnapshot.docs.map(doc => doc.data());
-      });
+        const fetchedMessages = querySnapshot.docs.map(doc => {
+          return {
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc
+              .data()
+              .createdAt.toDate()
+              .toISOString()
+              .slice(2, 16)
+              .replace(/-/g, '/')
+              .replace('T', ' '),
+          } as Message;
+        });
+        setMessages(fetchedMessages);
+      })
+      .catch(error => console.log(error))
+      .finally(() => setIsLoading(false));
   };
 
   const sendMessageHandler = () => {
-    console.log(newMessage);
-    setNewMessage('');
+    if (user && newText.length > 0) {
+      const messageToSend: SendMessage = {
+        uid: user.uid,
+        displayedName: user.displayName,
+        text: newText,
+        imageUrl: user.photoURL,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      };
+
+      try {
+        firestore()
+          .collection('chatrooms')
+          .doc(roomId)
+          .collection('messages')
+          .add(messageToSend);
+      } catch (error) {
+        console.log(error);
+      }
+
+      console.log(messageToSend);
+      setNewText('');
+    }
+
     Keyboard.dismiss();
   };
+
+
+  const refreshHandler = () => {
+    setIsLoading(true);
+    console.log("refreshing")
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+
+    fetchMessages(roomId);
+  }, [messageLimit, roomId])
 
   useEffect(() => {
     const {roomId} = route.params;
     navigation.setOptions({title: roomId + ' Chat'});
+    setRoomId(roomId);
+    // console.log(roomId);
   }, []);
 
-  const message1: Message = {
-    id: "fkdjasæfj",
-    displayedName: "Thomas Paine",
-    text: "Hi, how have you been? It's been so long since we have talked. Don't be a stranger!",
-    imageUrl: 'https://reactnative.dev/img/tiny_logo.png',
-    createdAt: "4/4/2022 15:00:15"
-  }
+  // hent beskeder fra firebase
+  // automatisk opdater fra firebase
 
-  const message2: Message = {
-    id: "fkdjefawe",
-    displayedName: "Immanuel Kant",
-    text: "Hey there, been a little busy. What about you? I heard you got married? What's that all about?",
-    imageUrl: 'https://reactnative.dev/img/tiny_logo.png',
-    createdAt: "4/4/2022 15:04:32"
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={colors.primaryDark} />
+      </View>
+    );
   }
 
   return (
@@ -73,17 +128,22 @@ export default function ChatRoomScreen({
       keyboardVerticalOffset={80}
       style={{flex: 1}}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
-          <View style={styles.messageContainer}>
-            <ChatBubble 
-              message={message1}
+        <View style={{flex: 1}}>
+          {messages.length > 0 ? (
+            <ChatMessageContainer
+              messages={messages}
+              currentUserId={user?.uid}
+              isLoading={isLoading}
+              onRefresh={refreshHandler}
             />
-            <ChatBubble message={message2} putAvatarOnLeft={false} />
-
-          </View>
+          ) : (
+            <View style={styles.noMessageContainer}>
+              <Text>There are no messages to display yet</Text>
+            </View>
+          )}
           <ChatInputContainer
-            value={newMessage}
-            onChangeText={setNewMessage}
+            value={newText}
+            onChangeText={setNewText}
             onSend={sendMessageHandler}
             onCamera={() => {}}
             onPhotos={() => {}}
@@ -95,38 +155,5 @@ export default function ChatRoomScreen({
 }
 
 const styles = StyleSheet.create({
-  inner: {
-    flex: 1,
-  },
-  messageContainer: {
-    flex: 1,
-    paddingVertical: 10,
-    backgroundColor: 'white',
-    borderBottomColor: colors.primaryDark,
-    borderBottomWidth: 2,
-  },
-  image: {
-    width: 30,
-    height: 30,
-    borderRadius: 35,
-    backgroundColor: '#ccc',
-    marginHorizontal: 10,
-  },
-  messageBubble: {flexDirection: 'row', marginBottom: 10},
-  ownMessageBubble: {
-    alignSelf: 'flex-end',
-  },
-  message: {
-    width: '65%',
-  },
-  nameDate: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    marginBottom: 5
-  },
-  ownMessageColor: {
-    backgroundColor: '#efe',
-  },
+  noMessageContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
 });

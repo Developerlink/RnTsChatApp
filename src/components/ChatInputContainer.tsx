@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
+import { color } from 'react-native-reanimated';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import colors from '../constants/colors';
@@ -46,7 +47,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 5,
+    paddingVertical: 5,
+    borderTopColor: colors.primaryDark,
+    borderTopWidth: 1
   },
   textInput: {
     flex: 1,

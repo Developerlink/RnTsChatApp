@@ -20,11 +20,11 @@ export default function HomeScreen({
 }: RootStackScreenProps<'Home'>) {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>();
   const [isFetching, setIsFetching] = useState(false);
-  const db = firestore();
+  
 
   const fetchChatRooms = () => {
     setIsFetching(true);
-    db.collection('chatrooms')
+    firestore().collection('chatrooms')
       .get()
       .then(querySnapshot => {
         const fetchedChatRooms = querySnapshot.docs.map(doc => {
@@ -45,8 +45,8 @@ export default function HomeScreen({
     navigation.navigate('ChatRoom', {roomId});
   };
 
-  const renderChatRoomItem = (itemData: ListRenderItemInfo<ChatRoom>) => {
-    return <ChatRoomItem onPress={enterChatRoomHandler} item={itemData.item} />;
+  const renderChatRoomItem = ({item} : ListRenderItemInfo<ChatRoom>) => {
+    return <ChatRoomItem onPress={enterChatRoomHandler} item={item} />;
   };
 
   // TODO: sorted by newest message
@@ -58,7 +58,7 @@ export default function HomeScreen({
       renderItem={renderChatRoomItem}
       refreshing={isFetching}
       onRefresh={() => fetchChatRooms()}
-    />
+    />    
   );
 }
 

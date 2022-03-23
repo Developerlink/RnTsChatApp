@@ -12,7 +12,7 @@ interface Props {
 
 export default function ChatRoomItem({item, onPress}: Props) {
   return (
-    <TouchableOpacity onPress={() => onPress(item.id)} activeOpacity={0.6}>
+    <TouchableOpacity onPress={() => onPress(item.id)} activeOpacity={0.4}>
       <View style={styles.container}>
         <View>
           <View style={styles.titleContainer}>
