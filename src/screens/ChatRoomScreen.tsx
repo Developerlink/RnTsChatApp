@@ -37,6 +37,13 @@ export default function ChatRoomScreen({
   const [messageLimit, setMessageLimit] = useState(50);
 
   useEffect(() => {
+    const {roomId} = route.params;
+    navigation.setOptions({title: roomId + ' Chat'});
+    setRoomId(roomId);
+    // console.log(roomId);
+  }, []);
+
+  useEffect(() => {
     const subscriber = firestore()
       .collection('chatrooms')
       .doc(roomId)
@@ -69,12 +76,14 @@ export default function ChatRoomScreen({
 
   const sendMessageHandler = () => {
     if (user && newText.length > 0) {
+      const timeStamp = firestore.FieldValue.serverTimestamp();
+
       const messageToSend: SendMessage = {
         uid: user.uid,
         displayedName: user.displayName,
         text: newText,
         imageUrl: user.photoURL,
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        createdAt: timeStamp,
       };
 
       try {
@@ -82,12 +91,17 @@ export default function ChatRoomScreen({
           .collection('chatrooms')
           .doc(roomId)
           .collection('messages')
-          .add(messageToSend);
+          .add(messageToSend)
+          .then(() =>
+            firestore().collection('chatrooms').doc(roomId).update({
+              latestUpdate: timeStamp,
+            }),
+          );
       } catch (error) {
         console.log(error);
       }
 
-      console.log(messageToSend);
+      //console.log(messageToSend);
       setNewText('');
     }
 
@@ -98,29 +112,7 @@ export default function ChatRoomScreen({
     setMessageLimit(prevState => prevState + MESSAGE_NUMBER_INCREMENT);
   };
 
-  useEffect(() => {
-    const {roomId} = route.params;
-    navigation.setOptions({title: roomId + ' Chat'});
-    setRoomId(roomId);
-    // console.log(roomId);
-  }, []);
-
-  // hent beskeder fra firebase
-  // automatisk opdater fra firebase
-
-  // if (isLoading) {
-  //   return (
-  //     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-  //       <ActivityIndicator size="large" color={colors.primaryDark} />
-  //     </View>
-  //   );
-  // }
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80}
-      style={{flex: 1}}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{flex: 1}}>
           <ChatMessageContainer
@@ -137,7 +129,6 @@ export default function ChatRoomScreen({
           />
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {ChatRoom} from '../models/chatroom';
 import ChatRoomItem from '../components/ChatRoomItem';
 import colors from '../constants/colors';
 import TestingScreen from './TestingScreen';
+import {useFocusEffect} from '@react-navigation/native';
 
 export default function HomeScreen({
   navigation,
@@ -20,11 +21,12 @@ export default function HomeScreen({
 }: RootStackScreenProps<'Home'>) {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>();
   const [isFetching, setIsFetching] = useState(false);
-  
 
   const fetchChatRooms = () => {
     setIsFetching(true);
-    firestore().collection('chatrooms')
+    firestore()
+      .collection('chatrooms')
+      .orderBy('latestUpdate', 'desc')
       .get()
       .then(querySnapshot => {
         const fetchedChatRooms = querySnapshot.docs.map(doc => {
@@ -41,11 +43,18 @@ export default function HomeScreen({
     fetchChatRooms();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchChatRooms();
+      return () => {};
+    }, []),
+  );
+
   const enterChatRoomHandler = (roomId: string) => {
     navigation.navigate('ChatRoom', {roomId});
   };
 
-  const renderChatRoomItem = ({item} : ListRenderItemInfo<ChatRoom>) => {
+  const renderChatRoomItem = ({item}: ListRenderItemInfo<ChatRoom>) => {
     return <ChatRoomItem onPress={enterChatRoomHandler} item={item} />;
   };
 
@@ -58,7 +67,7 @@ export default function HomeScreen({
       renderItem={renderChatRoomItem}
       refreshing={isFetching}
       onRefresh={() => fetchChatRooms()}
-    />    
+    />
   );
 }
 

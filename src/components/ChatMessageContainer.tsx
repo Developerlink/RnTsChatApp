@@ -37,8 +37,6 @@ export default function ChatMessageContainer({
     );
   }
 
-
-
   return (
     <FlatList
       style={styles.messageContainer}
