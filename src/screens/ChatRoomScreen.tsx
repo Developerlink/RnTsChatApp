@@ -24,28 +24,30 @@ import ChatMessageContainer from '../components/ChatMessageContainer';
 import {Message, SendMessage} from '../models/message';
 import {useAuthContext} from '../store/authContext';
 
+const MESSAGE_NUMBER_INCREMENT = 50;
+
 export default function ChatRoomScreen({
   navigation,
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
   const [newText, setNewText] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[] | null>(null);
   const {user} = useAuthContext();
   const [roomId, setRoomId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [messageLimit, setMessageLimit] = useState(5);
-  console.log(isLoading);
+  const [messageLimit, setMessageLimit] = useState(50);
 
-  const fetchMessages = (roomId: string) => {
-    setIsLoading(true);
-    firestore()
+  useEffect(() => {
+    const subscriber = firestore()
       .collection('chatrooms')
       .doc(roomId)
       .collection('messages')
       .limit(messageLimit)
       .orderBy('createdAt', 'desc')
-      .get()
-      .then(querySnapshot => {
+      .onSnapshot({includeMetadataChanges: true}, querySnapshot => {
+        if (querySnapshot.metadata.hasPendingWrites) {
+          return; // ignore cache snapshots where new data is being written
+        }
+
         const fetchedMessages = querySnapshot.docs.map(doc => {
           return {
             id: doc.id,
@@ -60,10 +62,10 @@ export default function ChatRoomScreen({
           } as Message;
         });
         setMessages(fetchedMessages);
-      })
-      .catch(error => console.log(error))
-      .finally(() => setIsLoading(false));
-  };
+      });
+
+    return () => subscriber();
+  }, [roomId, messageLimit]);
 
   const sendMessageHandler = () => {
     if (user && newText.length > 0) {
@@ -92,17 +94,9 @@ export default function ChatRoomScreen({
     Keyboard.dismiss();
   };
 
-
-  const refreshHandler = () => {
-    setIsLoading(true);
-    console.log("refreshing")
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-
-    fetchMessages(roomId);
-  }, [messageLimit, roomId])
+  const getMoreMessagesHandler = () => {
+    setMessageLimit(prevState => prevState + MESSAGE_NUMBER_INCREMENT);
+  };
 
   useEffect(() => {
     const {roomId} = route.params;
@@ -114,13 +108,13 @@ export default function ChatRoomScreen({
   // hent beskeder fra firebase
   // automatisk opdater fra firebase
 
-  if (isLoading) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color={colors.primaryDark} />
-      </View>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+  //       <ActivityIndicator size="large" color={colors.primaryDark} />
+  //     </View>
+  //   );
+  // }
 
   return (
     <KeyboardAvoidingView
@@ -129,18 +123,11 @@ export default function ChatRoomScreen({
       style={{flex: 1}}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{flex: 1}}>
-          {messages.length > 0 ? (
-            <ChatMessageContainer
-              messages={messages}
-              currentUserId={user?.uid}
-              isLoading={isLoading}
-              onRefresh={refreshHandler}
-            />
-          ) : (
-            <View style={styles.noMessageContainer}>
-              <Text>There are no messages to display yet</Text>
-            </View>
-          )}
+          <ChatMessageContainer
+            messages={messages}
+            currentUserId={user?.uid}
+            onGetMoreMessages={getMoreMessagesHandler}
+          />
           <ChatInputContainer
             value={newText}
             onChangeText={setNewText}
