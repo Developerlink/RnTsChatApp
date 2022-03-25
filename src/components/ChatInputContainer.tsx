@@ -27,7 +27,7 @@ interface Props {
   onSendPress: () => void;
   onCameraPress: () => void;
   onImageLibraryPress: () => void;
-  image: string,
+  image: string;
   onCancelImagePress: () => void;
 }
 
@@ -38,7 +38,7 @@ export default function ChatInputContainer({
   onCameraPress,
   onImageLibraryPress,
   image,
-  onCancelImagePress: onCancelPress
+  onCancelImagePress: onCancelPress,
 }: Props) {
   // const [image, setImage] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -48,7 +48,7 @@ export default function ChatInputContainer({
   //   const options: ImageLibraryOptions = {
   //     selectionLimit: 1,
   //     mediaType: 'photo',
-  //     includeBase64: false,      
+  //     includeBase64: false,
   //   };
 
   //   launchImageLibrary(options, response => {
@@ -84,25 +84,28 @@ export default function ChatInputContainer({
       <TouchableOpacity style={styles.iconButton} onPress={onImageLibraryPress}>
         <FontAwesome name="photo" size={30} color={colors.primary} />
       </TouchableOpacity>
-      {image === '' ? (
+      <View style={styles.inputField}>
+        {image !== '' && (
+          <View style={styles.imageContainer}>
+            <Image
+              style={styles.image}
+              source={{
+                uri: image,
+              }}
+            />
+            <TouchableOpacity style={styles.iconButton} onPress={onCancelPress}>
+              <Feather name="x" size={30} color={'darkred'} />
+            </TouchableOpacity>
+          </View>
+        )}
         <TextInput
-          style={styles.inputField}
           placeholder="Type a message..."
           multiline={true}
           numberOfLines={1}
           value={value}
           onChangeText={newValue => onChangeText(newValue)}
         />
-      ) : (
-        <View style={styles.imageContainer}>
-          <Image style={styles.image} source={{uri: image}} />
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onCancelPress}>
-            <Feather name="x" size={30} color={'darkred'} />
-          </TouchableOpacity>
-        </View>
-      )}
+      </View>
       <TouchableOpacity style={styles.iconButton} onPress={onSendPress}>
         <Ionicon name="send" size={30} color={colors.primary} />
       </TouchableOpacity>
@@ -120,10 +123,11 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
+    flexDirection: 'column',    
     marginLeft: 10,
     marginRight: 5,
   },
-  imageContainer: {flex: 1, alignItems: 'center'},
+  imageContainer: {flexDirection: 'row', justifyContent: "center", alignItems: "center"},
   image: {
     height: 150,
     width: 140,

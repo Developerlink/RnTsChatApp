@@ -16,6 +16,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 
 import colors from '../constants/colors';
 import {RootStackScreenProps} from '../navigation/types';
@@ -117,19 +118,40 @@ export default function ChatRoomScreen({
     setImage('');
   };
 
-  const sendMessageHandler = () => {
-    if (user && newText.length > 0) {
-      const timeStamp = firestore.FieldValue.serverTimestamp();
-
-      const messageToSend: SendMessage = {
-        uid: user.uid,
-        displayedName: user.displayName,
-        text: newText,
-        imageUrl: user.photoURL,
-        createdAt: timeStamp,
-      };
-
+  const sendMessageHandler = async () => {
+    if ((user && image !== '') || (user && newText.length > 0)) {
+      const fileName = image.split('/').pop();
+      const reference = storage().ref(`/images/${fileName}`);
       try {
+        let messageToSend: SendMessage;
+        const timeStamp = firestore.FieldValue.serverTimestamp();
+
+        if (image !== '') {
+          const task = await reference.putFile(image);
+          const messageImageUrl = await storage()
+            .ref(`/images/${fileName}`)
+            .getDownloadURL();
+
+          messageToSend = {
+            uid: user.uid,
+            displayedName: user.displayName,
+            text: newText,
+            imageUrl: user.photoURL,
+            createdAt: timeStamp,
+            messageImageUrl: messageImageUrl,
+          };
+        } else {
+          messageToSend = {
+            uid: user.uid,
+            displayedName: user.displayName,
+            text: newText,
+            imageUrl: user.photoURL,
+            createdAt: timeStamp,
+          };
+        }
+
+        //console.log(messageToSend);
+
         firestore()
           .collection('chatrooms')
           .doc(roomId)
@@ -140,14 +162,13 @@ export default function ChatRoomScreen({
               latestUpdate: timeStamp,
             }),
           );
+
+        setImage('');
+        setNewText('');
       } catch (error) {
         console.log(error);
       }
-
-      //console.log(messageToSend);
-      setNewText('');
-    }
-
+    } 
     Keyboard.dismiss();
   };
 
@@ -179,4 +200,8 @@ export default function ChatRoomScreen({
 
 const styles = StyleSheet.create({
   noMessageContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  image: {
+    height: 150,
+    width: 140,
+  },
 });

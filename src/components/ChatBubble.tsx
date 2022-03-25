@@ -11,18 +11,27 @@ interface Props {
 
 export default function ChatBubble({message, isOwnMessage}: Props) {
   return (
-    <View style={isOwnMessage ? styles.ownMessageContainer : styles.messageContainer}>
+    <View
+      style={
+        isOwnMessage ? styles.ownMessageContainer : styles.messageContainer
+      }>
       {!isOwnMessage && (
         <Image style={styles.avatar} source={{uri: message.imageUrl}} />
       )}
       <Card style={isOwnMessage ? styles.ownMessage : styles.message}>
-        <View style={styles.name}>          
+        <View style={styles.name}>
           <Text>{message.displayedName}</Text>
         </View>
+        {message.messageImageUrl && (
+          <Image
+            style={styles.messageImage}
+            source={{uri: message.messageImageUrl}}
+            resizeMode={'contain'}
+          />
+        )}
         <Text>{message.text}</Text>
         <View style={styles.date}>
-
-          <Text>{message.createdAt}</Text>      
+          <Text>{message.createdAt}</Text>
         </View>
       </Card>
       {isOwnMessage && (
@@ -62,7 +71,8 @@ const styles = StyleSheet.create({
   },
   date: {
     flexDirection: 'row',
-    justifyContent: "flex-end",
-    marginTop: 5
-  }
+    justifyContent: 'flex-end',
+    marginTop: 5,
+  },
+  messageImage: {width: '80%', height: 200, marginBottom: 5},
 });
