@@ -72,10 +72,6 @@ export default function ChatInputContainer({
     }).catch(error => console.log(error));
   }, []);
 
-  const onSendImage = () => {
-    
-  }
-
   return (
     <View style={styles.inputContainer}>
       <TouchableOpacity style={styles.iconButton} onPress={onTakeImagePress}>
