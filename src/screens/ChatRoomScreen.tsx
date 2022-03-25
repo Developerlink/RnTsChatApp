@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -23,6 +23,12 @@ import ChatInputContainer from '../components/ChatInputContainer';
 import ChatMessageContainer from '../components/ChatMessageContainer';
 import {Message, SendMessage} from '../models/message';
 import {useAuthContext} from '../store/authContext';
+import {
+  launchImageLibrary,
+  CameraOptions,
+  launchCamera,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
 
 const MESSAGE_NUMBER_INCREMENT = 50;
 
@@ -35,6 +41,7 @@ export default function ChatRoomScreen({
   const {user} = useAuthContext();
   const [roomId, setRoomId] = useState('');
   const [messageLimit, setMessageLimit] = useState(50);
+  const [image, setImage] = useState('');
 
   useEffect(() => {
     const {roomId} = route.params;
@@ -73,6 +80,42 @@ export default function ChatRoomScreen({
 
     return () => subscriber();
   }, [roomId, messageLimit]);
+
+  const onImageLibraryPress = useCallback(() => {
+    const options: ImageLibraryOptions = {
+      selectionLimit: 1,
+      mediaType: 'photo',
+      includeBase64: false,
+    };
+
+    launchImageLibrary(options, response => {
+      let uri: string | undefined;
+      if (response.assets) {
+        uri = response.assets[0].uri;
+        setImage(uri!);
+      }
+    }).catch(error => console.log(error));
+  }, []);
+
+  const onCameraPress = useCallback(() => {
+    const options: CameraOptions = {
+      saveToPhotos: true,
+      mediaType: 'photo',
+      includeBase64: false,
+    };
+
+    launchCamera(options, response => {
+      let uri: string | undefined;
+      if (response.assets) {
+        uri = response.assets[0].uri;
+        setImage(uri!);
+      }
+    }).catch(error => console.log(error));
+  }, []);
+
+  const onCancelImagePress = () => {
+    setImage('');
+  };
 
   const sendMessageHandler = () => {
     if (user && newText.length > 0) {
@@ -113,22 +156,24 @@ export default function ChatRoomScreen({
   };
 
   return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{flex: 1}}>
-          <ChatMessageContainer
-            messages={messages}
-            currentUserId={user?.uid}
-            onGetMoreMessages={getMoreMessagesHandler}
-          />
-          <ChatInputContainer
-            value={newText}
-            onChangeText={setNewText}
-            onSend={sendMessageHandler}
-            onCamera={() => {}}
-            onPhotos={() => {}}
-          />
-        </View>
-      </TouchableWithoutFeedback>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={{flex: 1}}>
+        <ChatMessageContainer
+          messages={messages}
+          currentUserId={user?.uid}
+          onGetMoreMessages={getMoreMessagesHandler}
+        />
+        <ChatInputContainer
+          value={newText}
+          onChangeText={setNewText}
+          onSendPress={sendMessageHandler}
+          onCameraPress={onCameraPress}
+          onImageLibraryPress={onImageLibraryPress}
+          image={image}
+          onCancelImagePress={onCancelImagePress}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

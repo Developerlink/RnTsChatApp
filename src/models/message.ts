@@ -5,6 +5,7 @@ export interface Message {
     text: string;
     imageUrl: string;
     createdAt: string;
+    messageImageUrl?: string
 }
 
 export interface SendMessage {
@@ -13,4 +14,5 @@ export interface SendMessage {
     text: string;
     imageUrl: string | null;
     createdAt: any;
+    messageImageUrl?: string
 }

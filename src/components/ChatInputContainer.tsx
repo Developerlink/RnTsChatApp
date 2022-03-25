@@ -24,60 +24,64 @@ import colors from '../constants/colors';
 interface Props {
   value: string;
   onChangeText: (value: string) => void;
-  onSend: () => void;
-  onCamera: () => void;
-  onPhotos: () => void;
+  onSendPress: () => void;
+  onCameraPress: () => void;
+  onImageLibraryPress: () => void;
+  image: string,
+  onCancelImagePress: () => void;
 }
 
 export default function ChatInputContainer({
   value = '',
   onChangeText,
-  onSend,
-  onCamera,
-  onPhotos,
+  onSendPress,
+  onCameraPress,
+  onImageLibraryPress,
+  image,
+  onCancelImagePress: onCancelPress
 }: Props) {
-  const [image, setImage] = useState('');
+  // const [image, setImage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [transferred, setTransferred] = useState(0);
 
-  const onSelectImagePress = useCallback(() => {
-    const options: ImageLibraryOptions = {
-      selectionLimit: 1,
-      mediaType: 'photo',
-      includeBase64: false,      
-    };
+  // const onSelectImagePress = useCallback(() => {
+  //   const options: ImageLibraryOptions = {
+  //     selectionLimit: 1,
+  //     mediaType: 'photo',
+  //     includeBase64: false,      
+  //   };
 
-    launchImageLibrary(options, response => {
-      let uri: string | undefined;
-      if (response.assets) {
-        uri = response.assets[0].uri;
-        setImage(uri!);
-      }
-    }).catch(error => console.log(error));
-  }, []);
+  //   launchImageLibrary(options, response => {
+  //     let uri: string | undefined;
+  //     if (response.assets) {
+  //       uri = response.assets[0].uri;
+  //       setImage(uri!);
+  //     }
+  //   }).catch(error => console.log(error));
+  // }, []);
 
-  const onTakeImagePress = useCallback(() => {
-    const options: CameraOptions = {
-      saveToPhotos: true,
-      mediaType: 'photo',
-      includeBase64: false,
-    };
+  // const onTakeImagePress = useCallback(() => {
+  //   const options: CameraOptions = {
+  //     saveToPhotos: true,
+  //     mediaType: 'photo',
+  //     includeBase64: false,
+  //   };
 
-    launchCamera(options, response => {
-      let uri: string | undefined;
-      if (response.assets) {
-        uri = response.assets[0].uri;
-        setImage(uri!);
-      }
-    }).catch(error => console.log(error));
-  }, []);
+  //   launchCamera(options, response => {
+  //     let uri: string | undefined;
+  //     if (response.assets) {
+  //       uri = response.assets[0].uri;
+  //       setImage(uri!);
+  //     }
+  //   }).catch(error => console.log(error));
+  // }, []);
 
   return (
     <View style={styles.inputContainer}>
-      <TouchableOpacity style={styles.iconButton} onPress={onTakeImagePress}>
+      <TouchableOpacity style={styles.iconButton} onPress={onCameraPress}>
         <FontAwesome name="camera-retro" size={30} color={colors.primary} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.iconButton} onPress={onSelectImagePress}>
+      <TouchableOpacity style={styles.iconButton} onPress={onImageLibraryPress}>
         <FontAwesome name="photo" size={30} color={colors.primary} />
       </TouchableOpacity>
       {image === '' ? (
@@ -94,12 +98,12 @@ export default function ChatInputContainer({
           <Image style={styles.image} source={{uri: image}} />
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={() => setImage('')}>
+            onPress={onCancelPress}>
             <Feather name="x" size={30} color={'darkred'} />
           </TouchableOpacity>
         </View>
       )}
-      <TouchableOpacity style={styles.iconButton} onPress={onSend}>
+      <TouchableOpacity style={styles.iconButton} onPress={onSendPress}>
         <Ionicon name="send" size={30} color={colors.primary} />
       </TouchableOpacity>
     </View>
