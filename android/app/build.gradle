@@ -134,6 +134,14 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
+    packagingOptions{
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/LICENSE.txt'
+}
+
     defaultConfig {
         applicationId "com.rntschatapp"
         minSdkVersion rootProject.ext.minSdkVersion
