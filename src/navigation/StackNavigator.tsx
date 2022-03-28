@@ -2,7 +2,11 @@ import React, {useEffect, useState} from 'react';
 import {Platform, Button} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {signOut} from '../api/firebaseAuth';
-import {signOutFromFacebook, signInWithGoogleAsync, signOutFromGoogleAsync} from '../api/socialAuth';
+import {
+  signOutFromFacebook,
+  signInWithGoogleAsync,
+  signOutFromGoogleAsync,
+} from '../api/socialAuth';
 import auth from '@react-native-firebase/auth';
 import SplashScreen from 'react-native-splash-screen';
 
@@ -31,16 +35,19 @@ export default function StackNavigator() {
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  if (!isLoading) {
-     SplashScreen.hide();
-  }
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hide();
+    }
+
+    return () => {};
+  }, [isLoading]);
 
   return (
     <RootStack.Navigator
       initialRouteName="Home"
       screenOptions={{
         headerRight: () => (
-
           <Button
             title="Logout"
             onPress={() => {
@@ -48,7 +55,7 @@ export default function StackNavigator() {
               signOutFromGoogleAsync();
               signOutFromFacebook();
             }}
-            color={colors.primary}            
+            color={colors.primary}
           />
         ),
         headerStyle: {
