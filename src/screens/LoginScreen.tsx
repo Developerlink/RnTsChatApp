@@ -89,11 +89,6 @@ export default function LoginScreen({
           {errors['email'] && (
             <Text style={styles.error}>{errors['email'].message}</Text>
           )}
-          {/* <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={(value: string) => {}}
-        /> */}
           <Text style={styles.label}>Email</Text>
         </View>
         <View style={styles.inputContainer}>
@@ -120,6 +115,7 @@ export default function LoginScreen({
           {/* <TextInput style={styles.input} secureTextEntry /> */}
           <Text style={styles.label}>Password</Text>
         </View>
+        
         <View style={styles.upperButtonContainer}>
           <View style={styles.upperButton}>
             <Button

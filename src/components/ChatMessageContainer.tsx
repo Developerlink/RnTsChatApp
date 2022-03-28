@@ -42,7 +42,8 @@ export default function ChatMessageContainer({
       style={styles.messageContainer}
       contentContainerStyle={styles.contentStyle}
       data={messages}
-      renderItem={renderMessageItem}      
+      renderItem={renderMessageItem}   
+      initialNumToRender={10}   
       inverted
       onEndReached={onGetMoreMessages}
       onEndReachedThreshold={0.001}

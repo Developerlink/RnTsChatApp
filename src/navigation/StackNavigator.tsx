@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {Platform, Button} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {signOut} from '../api/firebaseAuth';
+import {signOutFromFacebook, signInWithGoogleAsync, signOutFromGoogleAsync} from '../api/socialAuth';
+import auth from '@react-native-firebase/auth';
+import SplashScreen from 'react-native-splash-screen';
+
+import colors from '../constants/colors';
 import {RootStackParamList} from './types';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import TestingScreen from '../screens/TestingScreen';
-import SplashScreen from '../screens/SplashScreen';
+import LoadingScreen from '../screens/LoadingScreen';
 import {useAuthContext} from '../store/authContext';
-import {signOut} from '../api/firebaseAuth';
-import {signOutFromFacebook, signInWithGoogleAsync, signOutFromGoogleAsync} from '../api/socialAuth';
-import auth from '@react-native-firebase/auth';
-
-import colors from '../constants/colors';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,8 +31,8 @@ export default function StackNavigator() {
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  if (isLoading) {
-    return <SplashScreen />;
+  if (!isLoading) {
+     SplashScreen.hide();
   }
 
   return (

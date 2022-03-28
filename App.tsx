@@ -9,6 +9,7 @@ import { LogBox } from 'react-native';
 
 import StackNavigator from './src/navigation/StackNavigator';
 import {AuthContextProvider} from './src/store/authContext';
+import colors from "./src/constants/colors";
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
@@ -20,7 +21,7 @@ const App = () => {
   return (
     <AuthContextProvider>
       <NavigationContainer>
-        <StatusBar barStyle={'light-content'} backgroundColor="black" />
+        <StatusBar barStyle={'light-content'} backgroundColor={colors.primaryDark} />
         <StackNavigator />
       </NavigationContainer>
     </AuthContextProvider>
