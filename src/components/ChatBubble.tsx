@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {Image, StyleSheet, Text, View, Dimensions} from 'react-native';
 import Card from './Card';
 
@@ -9,7 +9,7 @@ interface Props {
   isOwnMessage: boolean;
 }
 
-export default function ChatBubble({message, isOwnMessage}: Props) {
+export default memo(function ChatBubble({message, isOwnMessage}: Props) {
   return (
     <View
       style={
@@ -39,7 +39,7 @@ export default function ChatBubble({message, isOwnMessage}: Props) {
       )}
     </View>
   );
-}
+})
 
 const styles = StyleSheet.create({
   avatar: {
