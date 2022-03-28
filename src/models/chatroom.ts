@@ -1,5 +1,6 @@
 export interface ChatRoom {
-    id: string;
-    info: string;
-    name: string;
+  id: string;
+  info: string;
+  name: string;
+  latestUpdate: any;
 }

@@ -30,7 +30,17 @@ export default function HomeScreen({
       .get()
       .then(querySnapshot => {
         const fetchedChatRooms = querySnapshot.docs.map(doc => {
-          return {id: doc.id, ...doc.data()} as ChatRoom;
+          return {
+            id: doc.id,
+            ...doc.data(),
+            latestUpdate: doc
+              .data()
+              .latestUpdate.toDate()
+              .toISOString()
+              .slice(2, 19)
+              .replace(/-/g, '/')
+              .replace('T', ' '),
+          } as ChatRoom;
         });
         setChatRooms(fetchedChatRooms);
         //console.log(fetchedChatRooms);

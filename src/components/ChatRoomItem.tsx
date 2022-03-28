@@ -13,20 +13,22 @@ interface Props {
 export default function ChatRoomItem({item, onPress}: Props) {
   return (
     <TouchableOpacity onPress={() => onPress(item.id)} activeOpacity={0.4}>
-      <View style={styles.container}>
-        <View>
-          <View style={styles.titleContainer}>
-            <Text style={styles.titleText}>{item.id}</Text>
+      <View style={styles.outer}>
+        <View style={styles.infoContainer}>
+          <View style={styles.inner}>
+            <View>
+              <Text style={styles.titleText}>{item.id}</Text>
+            </View>
+            {/* <View style={styles.rightSide}>
+              <Text style={styles.infoText}>{item.latestUpdate}</Text>
+            </View> */}
           </View>
           <View>
             <Text style={styles.infoText}>{item.info}</Text>
           </View>
         </View>
-        <View style={styles.rightSide}>
-          <Text style={styles.infoText}>Jan 12</Text>
-          <View style={styles.icon}>
-            <Icon name="chevron-right" size={30} color="grey" />
-          </View>
+        <View style={styles.icon}>
+          <Icon name="chevron-right" size={30} color="grey" />
         </View>
       </View>
     </TouchableOpacity>
@@ -34,14 +36,16 @@ export default function ChatRoomItem({item, onPress}: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     borderBottomColor: colors.primaryDark,
     borderBottomWidth: 2,
     padding: 10,
   },
-  titleContainer: {
+  infoContainer: {width: "90%"},
+  inner: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -59,5 +63,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 15,
+    width: 20,
   },
 });
