@@ -19,7 +19,6 @@ const signInWithGoogleAsync = async () => {
     const userSignIn = auth().signInWithCredential(googleCredential);
 
     userSignIn
-      .then(user => console.log(user))
       .catch(error => console.log(error));
   } catch (error) {
     console.log(error);
@@ -63,7 +62,6 @@ const signInWithFacebookAsync = async () => {
     const userSignIn = auth().signInWithCredential(facebookCredential);
 
     userSignIn
-      .then(user => console.log(user))
       .catch(error => console.log(error));
   } catch (error) {
     console.log(error);

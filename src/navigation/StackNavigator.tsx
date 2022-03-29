@@ -1,6 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Platform, Button} from 'react-native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
 import {signOut} from '../api/firebaseAuth';
 import {
   signOutFromFacebook,
@@ -9,21 +13,23 @@ import {
 } from '../api/socialAuth';
 import auth from '@react-native-firebase/auth';
 import SplashScreen from 'react-native-splash-screen';
+import messaging from '@react-native-firebase/messaging';
 
 import colors from '../constants/colors';
-import {RootStackParamList} from './types';
+import {RootStackParamList, RootStackScreenProps} from './types';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import TestingScreen from '../screens/TestingScreen';
-import LoadingScreen from '../screens/LoadingScreen';
 import {useAuthContext} from '../store/authContext';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function StackNavigator() {
   const {user, setUser, isLoading, setIsLoading} = useAuthContext();
-  //console.log(user);
+  let isMounted = useRef(false);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, "ChatRoom">>();
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(user => {
@@ -32,8 +38,35 @@ export default function StackNavigator() {
         setIsLoading(false);
       }
     });
+
+
     return subscriber; // unsubscribe on unmount
   }, []);
+
+  // useEffect(() => {
+  //   // Assume a message-notification contains a "type" property in the data payload of the screen to open
+
+  //   messaging().onNotificationOpenedApp(remoteMessage => {
+  //     console.log(
+  //       'Notification caused app to open from background state:',
+  //       remoteMessage.notification,
+  //     );
+  //     navigation.navigate('ChatRoom', {roomId: 'Books'});
+  //   });
+
+  //   // Check whether an initial notification is available
+  //   messaging()
+  //     .getInitialNotification()
+  //     .then(remoteMessage => {
+  //       if (remoteMessage) {
+  //         console.log(
+  //           'Notification caused app to open from quit state:',
+  //           remoteMessage.notification,
+  //         );
+  //         navigation.navigate('ChatRoom', {roomId: 'Books'});
+  //       }
+  //     });
+  // }, []);
 
   useEffect(() => {
     if (!isLoading) {

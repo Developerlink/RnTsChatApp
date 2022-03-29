@@ -1,35 +1,24 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
-  KeyboardAvoidingView,
-  TextInput,
   StyleSheet,
-  Text,
-  Platform,
   TouchableWithoutFeedback,
-  Button,
   Keyboard,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  ListRenderItemInfo,
-  ActivityIndicator,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-
-import colors from '../constants/colors';
-import {RootStackScreenProps} from '../navigation/types';
-import ChatInputContainer from '../components/ChatInputContainer';
-import ChatMessageContainer from '../components/ChatMessageContainer';
-import {Message, SendMessage} from '../models/message';
-import {useAuthContext} from '../store/authContext';
 import {
   launchImageLibrary,
   CameraOptions,
   launchCamera,
   ImageLibraryOptions,
 } from 'react-native-image-picker';
+
+import {RootStackScreenProps} from '../navigation/types';
+import ChatInputContainer from '../components/ChatInputContainer';
+import ChatMessageContainer from '../components/ChatMessageContainer';
+import {Message, SendMessage} from '../models/message';
+import {useAuthContext} from '../store/authContext';
 
 const MESSAGE_NUMBER_INCREMENT = 50;
 
@@ -43,6 +32,7 @@ export default function ChatRoomScreen({
   const [roomId, setRoomId] = useState('');
   const [messageLimit, setMessageLimit] = useState(50);
   const [image, setImage] = useState('');
+  
 
   useEffect(() => {
     const {roomId} = route.params;
@@ -168,7 +158,7 @@ export default function ChatRoomScreen({
       } catch (error) {
         console.log(error);
       }
-    } 
+    }
     Keyboard.dismiss();
   };
 

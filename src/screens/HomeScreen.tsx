@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import ChatRoomItem from '../components/ChatRoomItem';
 import colors from '../constants/colors';
 import TestingScreen from './TestingScreen';
 import {useFocusEffect} from '@react-navigation/native';
+import {createSelectorCreator} from 'reselect';
 
 export default function HomeScreen({
   navigation,
@@ -21,6 +22,7 @@ export default function HomeScreen({
 }: RootStackScreenProps<'Home'>) {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>();
   const [isFetching, setIsFetching] = useState(false);
+  const isMounted = useRef(false);
 
   const fetchChatRooms = () => {
     setIsFetching(true);
@@ -42,21 +44,26 @@ export default function HomeScreen({
               .replace('T', ' '),
           } as ChatRoom;
         });
-        setChatRooms(fetchedChatRooms);
-        //console.log(fetchedChatRooms);
+
+        // Check ref before updating state
+        if (isMounted.current) {
+          setChatRooms(fetchedChatRooms);
+          //console.log(fetchedChatRooms);
+        }
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        console.log(error);
+        // If a state needs to be updated:
+        // isMounted.current && setError(error);
+      })
       .finally(() => setIsFetching(false));
   };
 
-  useEffect(() => {
-    fetchChatRooms();
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
+      isMounted.current = true;
       fetchChatRooms();
-      return () => {};
+      return () => isMounted.current = false;
     }, []),
   );
 
@@ -65,7 +72,11 @@ export default function HomeScreen({
   };
 
   const renderChatRoomItem = ({item}: ListRenderItemInfo<ChatRoom>) => {
-    return <ChatRoomItem onPress={enterChatRoomHandler} item={item} />;
+    return (
+      <View>
+        <ChatRoomItem onPress={enterChatRoomHandler} item={item} />
+      </View>
+    );
   };
 
   // TODO: sorted by newest message
