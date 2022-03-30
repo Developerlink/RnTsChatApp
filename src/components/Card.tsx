@@ -1,11 +1,10 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 interface Props {
     children: React.ReactNode,
     style?: any
 }
-
 
 export default function Card({children, style}: Props) {
   return (

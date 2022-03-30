@@ -1,3 +1,4 @@
+import {Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
@@ -8,6 +9,7 @@ GoogleSignin.configure({
 });
 
 const signInWithGoogleAsync = async () => {
+  console.log('trying to sign in with google');
   try {
     // Get the users ID token
     const {idToken} = await GoogleSignin.signIn();
@@ -18,9 +20,15 @@ const signInWithGoogleAsync = async () => {
     // Sign-in the user with the credential
     const userSignIn = auth().signInWithCredential(googleCredential);
 
-    userSignIn
-      .catch(error => console.log(error));
+    userSignIn.catch(error => console.log(error));
   } catch (error) {
+    if (error === '[Error: Sign in action cancelled]') {
+      return;
+    } 
+    Alert.alert(
+      'Login error',
+      'There was an unknown problem signing in to google.',
+    );
     console.log(error);
   }
 };
@@ -43,14 +51,14 @@ const signInWithFacebookAsync = async () => {
     ]);
 
     if (result.isCancelled) {
-      throw 'User cancelled the login process';
+      throw '[Error: Sign in action cancelled]';
     }
 
     // Once signed in, get the users AccesToken
     const data = await AccessToken.getCurrentAccessToken();
 
     if (!data) {
-      throw 'Something went wrong obtaining access token';
+      throw '[Error: Something went wrong obtaining access token]';
     }
 
     // Create a Firebase credential with the AccessToken
@@ -61,9 +69,16 @@ const signInWithFacebookAsync = async () => {
     // Sign-in the user with the credential
     const userSignIn = auth().signInWithCredential(facebookCredential);
 
-    userSignIn
-      .catch(error => console.log(error));
+    userSignIn.catch(error => console.log(error));
   } catch (error) {
+    if (error === '[Error: Sign in action cancelled]') {
+      return;
+    } 
+
+    Alert.alert(
+      'Login error',
+      'There was an unknown problem signing in to facebook.',
+    );
     console.log(error);
   }
 };

@@ -1,27 +1,21 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {Platform, Button} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
-import {signOut} from '../api/firebaseAuth';
-import {
-  signOutFromFacebook,
-  signInWithGoogleAsync,
-  signOutFromGoogleAsync,
-} from '../api/socialAuth';
 import auth from '@react-native-firebase/auth';
 import SplashScreen from 'react-native-splash-screen';
-import messaging from '@react-native-firebase/messaging';
 
 import colors from '../constants/colors';
-import {RootStackParamList, RootStackScreenProps} from './types';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
-import TestingScreen from '../screens/TestingScreen';
+import {RootStackParamList} from './types';
 import {useAuthContext} from '../store/authContext';
+import {signOut} from '../api/firebaseAuth';
+import {signOutFromFacebook, signOutFromGoogleAsync} from '../api/socialAuth';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,45 +23,31 @@ export default function StackNavigator() {
   const {user, setUser, isLoading, setIsLoading} = useAuthContext();
   let isMounted = useRef(false);
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, "ChatRoom">>();
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'ChatRoom'>>();
 
+  // Check if user is already logged in
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(user => {
-      setUser(user);
-      if (isLoading) {
-        setIsLoading(false);
-      }
-    });
+    isMounted.current = true;
+    try {
+      auth().onAuthStateChanged(user => {
+        if (isMounted.current) {
+          setUser(user);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
+    setIsLoading(false);
 
-    return subscriber; // unsubscribe on unmount
+    return () => {
+      (() => {
+        isMounted.current = false;
+      })();
+    };
   }, []);
 
-  // useEffect(() => {
-  //   // Assume a message-notification contains a "type" property in the data payload of the screen to open
-
-  //   messaging().onNotificationOpenedApp(remoteMessage => {
-  //     console.log(
-  //       'Notification caused app to open from background state:',
-  //       remoteMessage.notification,
-  //     );
-  //     navigation.navigate('ChatRoom', {roomId: 'Books'});
-  //   });
-
-  //   // Check whether an initial notification is available
-  //   messaging()
-  //     .getInitialNotification()
-  //     .then(remoteMessage => {
-  //       if (remoteMessage) {
-  //         console.log(
-  //           'Notification caused app to open from quit state:',
-  //           remoteMessage.notification,
-  //         );
-  //         navigation.navigate('ChatRoom', {roomId: 'Books'});
-  //       }
-  //     });
-  // }, []);
-
+  // Hide splash screen when finished loading
   useEffect(() => {
     if (!isLoading) {
       SplashScreen.hide();
@@ -106,7 +86,6 @@ export default function StackNavigator() {
             component={ChatRoomScreen}
             options={{title: 'Chat Room'}}
           />
-          <RootStack.Screen name="Testing" component={TestingScreen} />
         </>
       ) : (
         <RootStack.Screen

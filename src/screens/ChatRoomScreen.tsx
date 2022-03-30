@@ -17,8 +17,9 @@ import {
 import {RootStackScreenProps} from '../navigation/types';
 import ChatInputContainer from '../components/ChatInputContainer';
 import ChatMessageContainer from '../components/ChatMessageContainer';
-import {Message, SendMessage} from '../models/message';
 import {useAuthContext} from '../store/authContext';
+import {Message, SendMessage} from '../models/message';
+import {getMessagesAsync} from '../api/firestoreAgent';
 
 const MESSAGE_NUMBER_INCREMENT = 50;
 
@@ -26,22 +27,26 @@ export default function ChatRoomScreen({
   navigation,
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
-  const [newText, setNewText] = useState('');
-  const [messages, setMessages] = useState<Message[] | null>(null);
-  const {user} = useAuthContext();
   const [roomId, setRoomId] = useState('');
+  const [messages, setMessages] = useState<Message[] | null>(null);
   const [messageLimit, setMessageLimit] = useState(50);
+  const [newMessage, setNewMessage] = useState('');
   const [image, setImage] = useState('');
-  
+  const {user} = useAuthContext();
 
+  // Setting header title and roomId
   useEffect(() => {
     const {roomId} = route.params;
     navigation.setOptions({title: roomId + ' Chat'});
     setRoomId(roomId);
-    // console.log(roomId);
   }, []);
 
+  // Fetching messages from database
   useEffect(() => {
+     getMessagesAsync({roomId, messageLimit}).then(result =>
+      console.log(result),
+    );
+
     const subscriber = firestore()
       .collection('chatrooms')
       .doc(roomId)
@@ -70,8 +75,9 @@ export default function ChatRoomScreen({
       });
 
     return () => subscriber();
-  }, [roomId, messageLimit]);
+  }, [roomId, messageLimit, setMessages]);
 
+  // Selecting image from library
   const onImageLibraryPress = useCallback(() => {
     const options: ImageLibraryOptions = {
       selectionLimit: 1,
@@ -88,6 +94,7 @@ export default function ChatRoomScreen({
     }).catch(error => console.log(error));
   }, []);
 
+  // Taking photo with camera
   const onCameraPress = useCallback(() => {
     const options: CameraOptions = {
       saveToPhotos: true,
@@ -109,7 +116,7 @@ export default function ChatRoomScreen({
   };
 
   const sendMessageHandler = async () => {
-    if ((user && image !== '') || (user && newText.length > 0)) {
+    if ((user && image !== '') || (user && newMessage.length > 0)) {
       const fileName = image.split('/').pop();
       const reference = storage().ref(`/images/${fileName}`);
       try {
@@ -125,7 +132,7 @@ export default function ChatRoomScreen({
           messageToSend = {
             uid: user.uid,
             displayedName: user.displayName,
-            text: newText,
+            text: newMessage,
             imageUrl: user.photoURL,
             createdAt: timeStamp,
             messageImageUrl: messageImageUrl,
@@ -134,13 +141,11 @@ export default function ChatRoomScreen({
           messageToSend = {
             uid: user.uid,
             displayedName: user.displayName,
-            text: newText,
+            text: newMessage,
             imageUrl: user.photoURL,
             createdAt: timeStamp,
           };
         }
-
-        //console.log(messageToSend);
 
         firestore()
           .collection('chatrooms')
@@ -154,7 +159,7 @@ export default function ChatRoomScreen({
           );
 
         setImage('');
-        setNewText('');
+        setNewMessage('');
       } catch (error) {
         console.log(error);
       }
@@ -175,8 +180,8 @@ export default function ChatRoomScreen({
           onGetMoreMessages={getMoreMessagesHandler}
         />
         <ChatInputContainer
-          value={newText}
-          onChangeText={setNewText}
+          text={newMessage}
+          onChangeText={setNewMessage}
           onSendPress={sendMessageHandler}
           onCameraPress={onCameraPress}
           onImageLibraryPress={onImageLibraryPress}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   FlatList,
   ListRenderItemInfo,
@@ -22,8 +22,6 @@ export default function ChatMessageContainer({
   currentUserId,
   onGetMoreMessages,
 }: Props) {
-  const [isFetching, setIsFetching] = useState(false);
-
   const renderMessageItem = ({item}: ListRenderItemInfo<Message>) => {
     const isOwnMessage = item.uid === currentUserId ? true : false;
     return <ChatBubble message={item} isOwnMessage={isOwnMessage} />;
@@ -42,8 +40,8 @@ export default function ChatMessageContainer({
       style={styles.messageContainer}
       contentContainerStyle={styles.contentStyle}
       data={messages}
-      renderItem={renderMessageItem}   
-      initialNumToRender={10}   
+      renderItem={renderMessageItem}
+      initialNumToRender={10}
       inverted
       onEndReached={onGetMoreMessages}
       onEndReachedThreshold={0.001}

@@ -1,32 +1,20 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  FlatList,
-  ListRenderItemInfo,
-} from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-import {RootStackScreenProps} from '../navigation/types';
-import {ChatRoom} from '../models/chatroom';
-import ChatRoomItem from '../components/ChatRoomItem';
-import colors from '../constants/colors';
-import TestingScreen from './TestingScreen';
+import React, {useCallback, useRef, useState} from 'react';
+import {View, StyleSheet, FlatList, ListRenderItemInfo} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
-import {createSelectorCreator} from 'reselect';
+import firestore from '@react-native-firebase/firestore';
 
-export default function HomeScreen({
-  navigation,
-  route,
-}: RootStackScreenProps<'Home'>) {
+import {RootStackScreenProps} from '../navigation/types';
+import ChatRoomItem from '../components/ChatRoomItem';
+import {ChatRoom} from '../models/chatroom';
+
+export default function HomeScreen({navigation}: RootStackScreenProps<'Home'>) {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>();
   const [isFetching, setIsFetching] = useState(false);
   const isMounted = useRef(false);
 
-  const fetchChatRooms = () => {
+  const fetchChatRooms = async () => {
     setIsFetching(true);
-    firestore()
+    await firestore()
       .collection('chatrooms')
       .orderBy('latestUpdate', 'desc')
       .get()
@@ -48,7 +36,6 @@ export default function HomeScreen({
         // Check ref before updating state
         if (isMounted.current) {
           setChatRooms(fetchedChatRooms);
-          //console.log(fetchedChatRooms);
         }
       })
       .catch(error => {
@@ -59,11 +46,12 @@ export default function HomeScreen({
       .finally(() => setIsFetching(false));
   };
 
+  // Reload chatrooms when going back
   useFocusEffect(
     useCallback(() => {
       isMounted.current = true;
       fetchChatRooms();
-      return () => isMounted.current = false;
+      return () => (isMounted.current = false);
     }, []),
   );
 
@@ -79,19 +67,18 @@ export default function HomeScreen({
     );
   };
 
-  // TODO: sorted by newest message
-
   return (
     <FlatList
-      style={styles.container}
       data={chatRooms}
       renderItem={renderChatRoomItem}
       refreshing={isFetching}
-      onRefresh={() => fetchChatRooms()}
+      onRefresh={async () => {
+        isMounted.current = true;
+        await fetchChatRooms();
+        isMounted.current = false;
+      }}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {width: '100%'},
-});
+const styles = StyleSheet.create({});

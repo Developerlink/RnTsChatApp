@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {memo} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {ChatRoom} from '../models/chatroom';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -10,7 +10,7 @@ interface Props {
   onPress: (roomId: string) => void;
 }
 
-export default function ChatRoomItem({item, onPress}: Props) {
+export default memo(function ChatRoomItem({item, onPress}: Props) {
   return (
     <TouchableOpacity onPress={() => onPress(item.id)} activeOpacity={0.4}>
       <View style={styles.outer}>
@@ -19,9 +19,6 @@ export default function ChatRoomItem({item, onPress}: Props) {
             <View>
               <Text style={styles.titleText}>{item.id}</Text>
             </View>
-            {/* <View style={styles.rightSide}>
-              <Text style={styles.infoText}>{item.latestUpdate}</Text>
-            </View> */}
           </View>
           <View>
             <Text style={styles.infoText}>{item.info}</Text>
@@ -33,7 +30,7 @@ export default function ChatRoomItem({item, onPress}: Props) {
       </View>
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   outer: {
@@ -44,7 +41,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     padding: 10,
   },
-  infoContainer: {width: "90%"},
+  infoContainer: {width: '90%'},
   inner: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -9,31 +9,25 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
+import colors from '../constants/colors';
 import {signUp, signIn} from '../api/firebaseAuth';
 import {
   signInWithGoogleAsync,
   signInWithFacebookAsync,
 } from '../api/socialAuth';
-import {RootStackScreenProps} from '../navigation/types';
-import {useAuthContext} from '../store/authContext';
-import colors from '../constants/colors';
 
 const schema = yup.object({
   email: yup.string().email().required(),
   password: yup.string().required(),
 });
 
-export default function LoginScreen({
-  navigation,
-  route,
-}: RootStackScreenProps<'Login'>) {
+export default function LoginScreen() {
   const [isSigningIn, setIsSigningIn] = useState(true);
-  const {onLogIn} = useAuthContext();
   const {
     handleSubmit,
     control,
@@ -45,6 +39,7 @@ export default function LoginScreen({
   const emailInputRef = useRef<TextInput | null>(null);
   const passwordInputRef = useRef<TextInput | null>(null);
 
+  // Firebase user login
   const onSubmit = (data: any) => {
     const email: string = data.email;
     const password: string = data.password;
@@ -141,7 +136,7 @@ export default function LoginScreen({
         </View>
 
         <View style={styles.button}>
-          <Icon.Button
+          <FontAwesome.Button
             name="facebook"
             backgroundColor="#3b5998"
             onPress={signInWithFacebookAsync}
@@ -151,10 +146,10 @@ export default function LoginScreen({
               style={{color: 'white', fontWeight: '500', textAlign: 'center'}}>
               Sign in with Facebook
             </Text>
-          </Icon.Button>
+          </FontAwesome.Button>
         </View>
         <View style={styles.button}>
-          <Icon.Button
+          <FontAwesome.Button
             name="google"
             backgroundColor="darkred"
             onPress={signInWithGoogleAsync}
@@ -164,7 +159,7 @@ export default function LoginScreen({
               style={{color: 'white', fontWeight: '500', textAlign: 'center'}}>
               Sign in with Google
             </Text>
-          </Icon.Button>
+          </FontAwesome.Button>
         </View>
       </View>
     </ScrollView>

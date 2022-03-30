@@ -7,13 +7,12 @@ import {enableScreens} from 'react-native-screens';
 import {NavigationContainer} from '@react-navigation/native';
 import { LogBox } from 'react-native';
 
+// Own imports
+import colors from "./src/constants/colors";
 import StackNavigator from './src/navigation/StackNavigator';
 import {AuthContextProvider} from './src/store/authContext';
-import colors from "./src/constants/colors";
 
-LogBox.ignoreLogs([
-  "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
-]);
+LogBox.ignoreLogs(['new NativeEventEmitter']);
 
 enableScreens();
 
