@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   FlatList,
   ListRenderItemInfo,
@@ -22,10 +22,10 @@ export default function ChatMessageContainer({
   currentUserId,
   onGetMoreMessages,
 }: Props) {
-  const renderMessageItem = ({item}: ListRenderItemInfo<Message>) => {
+  const renderMessageItem = useCallback(({item}: ListRenderItemInfo<Message>) => {
     const isOwnMessage = item.uid === currentUserId ? true : false;
     return <ChatBubble message={item} isOwnMessage={isOwnMessage} />;
-  };
+  }, [messages]);
 
   if (!messages || messages.length === 0) {
     return (

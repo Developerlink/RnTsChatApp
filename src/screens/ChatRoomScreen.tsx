@@ -19,7 +19,7 @@ import ChatInputContainer from '../components/ChatInputContainer';
 import ChatMessageContainer from '../components/ChatMessageContainer';
 import {useAuthContext} from '../store/authContext';
 import {Message, SendMessage} from '../models/message';
-import {getMessagesAsync} from '../api/firestoreAgent';
+import {fetchMessagesAsync} from '../api/firestoreAgent';
 
 const MESSAGE_NUMBER_INCREMENT = 50;
 
@@ -28,7 +28,7 @@ export default function ChatRoomScreen({
   route,
 }: RootStackScreenProps<'ChatRoom'>) {
   const [roomId, setRoomId] = useState('');
-  const [messages, setMessages] = useState<Message[] | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageLimit, setMessageLimit] = useState(50);
   const [newMessage, setNewMessage] = useState('');
   const [image, setImage] = useState('');
@@ -43,10 +43,6 @@ export default function ChatRoomScreen({
 
   // Fetching messages from database
   useEffect(() => {
-     getMessagesAsync({roomId, messageLimit}).then(result =>
-      console.log(result),
-    );
-
     const subscriber = firestore()
       .collection('chatrooms')
       .doc(roomId)
@@ -75,7 +71,7 @@ export default function ChatRoomScreen({
       });
 
     return () => subscriber();
-  }, [roomId, messageLimit, setMessages]);
+  }, [roomId, messageLimit]);
 
   // Selecting image from library
   const onImageLibraryPress = useCallback(() => {
@@ -111,11 +107,11 @@ export default function ChatRoomScreen({
     }).catch(error => console.log(error));
   }, []);
 
-  const onCancelImagePress = () => {
+  const onCancelImagePress = useCallback(() => {
     setImage('');
-  };
+  }, []);
 
-  const sendMessageHandler = async () => {
+  const sendMessageHandler = useCallback(async () => {
     if ((user && image !== '') || (user && newMessage.length > 0)) {
       const fileName = image.split('/').pop();
       const reference = storage().ref(`/images/${fileName}`);
@@ -165,11 +161,11 @@ export default function ChatRoomScreen({
       }
     }
     Keyboard.dismiss();
-  };
+  }, [image, newMessage]);
 
-  const getMoreMessagesHandler = () => {
+  const getMoreMessagesHandler = useCallback(() => {
     setMessageLimit(prevState => prevState + MESSAGE_NUMBER_INCREMENT);
-  };
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -194,7 +190,11 @@ export default function ChatRoomScreen({
 }
 
 const styles = StyleSheet.create({
-  noMessageContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  noMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   image: {
     height: 150,
     width: 140,
