@@ -69,15 +69,14 @@ export default function ChatRoomScreen({
           } as Message;
         });
         isMounted && setMessages(fetchedMessages);
-        console.table(fetchedMessages);
       });
-
-    return () => {
-      subscriber();
-      isMounted.current = false;
-    };
-  }, [roomId, messageLimit]);
-
+      
+      return () => {
+        subscriber();
+        isMounted.current = false;
+      };
+    }, [roomId, messageLimit]);
+    
   // Selecting image from library
   const onImageLibraryPress = useCallback(() => {
     const options: ImageLibraryOptions = {
@@ -116,7 +115,7 @@ export default function ChatRoomScreen({
     setImage('');
   }, []);
 
-  const sendMessageHandler = useCallback(async () => {
+  const onSendPress = useCallback(async () => {
     if ((user && image !== '') || (user && newMessage.length > 0)) {
       const fileName = image.split('/').pop();
       const reference = storage().ref(`/images/${fileName}`);
@@ -183,7 +182,7 @@ export default function ChatRoomScreen({
         <ChatInputContainer
           text={newMessage}
           onChangeText={setNewMessage}
-          onSendPress={sendMessageHandler}
+          onSendPress={onSendPress}
           onCameraPress={onCameraPress}
           onImageLibraryPress={onImageLibraryPress}
           image={image}
