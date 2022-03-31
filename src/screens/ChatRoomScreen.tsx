@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,7 +19,6 @@ import ChatInputContainer from '../components/ChatInputContainer';
 import ChatMessageContainer from '../components/ChatMessageContainer';
 import {useAuthContext} from '../store/authContext';
 import {Message, SendMessage} from '../models/message';
-import {fetchMessagesAsync} from '../api/firestoreAgent';
 
 const MESSAGE_NUMBER_INCREMENT = 50;
 
@@ -33,6 +32,7 @@ export default function ChatRoomScreen({
   const [newMessage, setNewMessage] = useState('');
   const [image, setImage] = useState('');
   const {user} = useAuthContext();
+  const isMounted = useRef(false);
 
   // Setting header title and roomId
   useEffect(() => {
@@ -43,6 +43,7 @@ export default function ChatRoomScreen({
 
   // Fetching messages from database
   useEffect(() => {
+    isMounted.current = true;
     const subscriber = firestore()
       .collection('chatrooms')
       .doc(roomId)
@@ -67,10 +68,14 @@ export default function ChatRoomScreen({
               .replace('T', ' '),
           } as Message;
         });
-        setMessages(fetchedMessages);
+        isMounted && setMessages(fetchedMessages);
+        console.table(fetchedMessages);
       });
 
-    return () => subscriber();
+    return () => {
+      subscriber();
+      isMounted.current = false;
+    };
   }, [roomId, messageLimit]);
 
   // Selecting image from library
